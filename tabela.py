@@ -18,6 +18,14 @@ class Tabela:
             for indice in indices:
                 registros.append(self.colunas[indice].toList())
             return Tabela(key,registros)
+            
+        elif type(key) == Coluna:
+            indices = [indice for indice,boleano in enumerate(key) if boleano]
+            registros = [[] for i in range(len(self.colunas))]
+            for indice in indices:
+                for numColuna,coluna in enumerate(self.colunas):
+                    registros[numColuna].append(coluna[indice])    
+            return Tabela(self.nomesColunas,registros)
         else:
             index = self.nomesColunas.index(key)
             return self.colunas[index]

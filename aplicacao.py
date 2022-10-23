@@ -5,5 +5,11 @@ class Aplicacao:
         self.leitorCSV = LeitorCSV()
     def rodar(self):
         dados = self.leitorCSV.lerCSV('employees.csv') 
-        registro = dados['emp_no'] != '10012'
+
+        # %string% -> comeco = False, final = False
+        # string% -> comeco = True, final = False
+        # %string -> comeco = False, final = True
         
+        selecao = dados['first_name'].like('Mai'.lower(),False,False)
+        resultado = dados[selecao]
+        pass

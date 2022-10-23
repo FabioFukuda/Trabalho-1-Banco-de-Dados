@@ -1,12 +1,30 @@
 class teste:
     def __init__(self):
-        self.n = 10
-    
-    def __ge__(self,n):
-        return 'oi'
+        self.n =[1,2,3,4,5,6]
+        self.a = 'a'
+    def operacaoComNumero(func):
+        def wrapper(*args,**kwargs):
+            try:
+                resultado = func(*args,**kwargs)
+                return resultado
+            except:
+                return args[0].a
+        return wrapper
+    def func(self):
+        print(self>9)
+    @operacaoComNumero
+    def __gt__(self,number):
+        return self.a>number
+
+    def __iter__(self):
+        return iter(self.n)
 
     def __contains__(self, key):
-        return [1,2,3,4,5]
-t = teste()
+        return key in self.n
+    
+a,b = 'abcdefg'.split('ab')
+print(a)
+print(b)
+len(a)
 
-print(9 in t) 
+
