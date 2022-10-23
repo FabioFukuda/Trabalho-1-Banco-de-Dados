@@ -24,8 +24,35 @@ class teste:
 
     def __contains__(self, key):
         return key in self.n
-    
+#Com Tudo
+#comando = "select s.name as nome,s.id as identificador, t.semester as semestre from student as s, takes as t where s.id = t.id and t.semester>='Spring' order by nome ASC"
+#Sem Where
+#comando = "select s.name as nome,s.id as identificador, t.semester as semestre from student as s, takes as t order by nome ASC"
+#Sem Order by
+#comando = "select s.name as nome,s.id as identificador, t.semester as semestre from student as s, takes as t where s.id = t.id and t.semester>='Spring'"
+#Sem Nada
+comando = "select s.name as nome,s.id as identificador, t.semester as semestre from student as s, takes as t"
+comandoSeparados = comando.split(' ')
+novaLista = []
+_from = []
+order = []
 
-t = teste()
+for i,comando in enumerate(comandoSeparados):
+    for c in comando.split(','):
+        if(c != ''):
+            novaLista.append(c)
+select = novaLista[1:novaLista.index('from')]
+if 'where' in novaLista:
+    _from = novaLista[novaLista.index('from')+1:novaLista.index('where')]
+    if 'order' in novaLista:
+        order = novaLista[novaLista.index('order')+2:]     
+elif 'order' in novaLista:
+    _from = novaLista[novaLista.index('from')+1:novaLista.index('order')]
+    order = novaLista[novaLista.index('order')+2:]
+else:
+    _from = novaLista[novaLista.index('from')+1:]
+print(select)
+print(_from)
+print(order)
 
-print(9 in t)
+

@@ -17,7 +17,7 @@ class LeitorCSV:
                 for indice,campo in enumerate(campos):
                     registros[indice].append(campo)
 
-        novaTabela = Tabela(nomesColunas,registros)
+        novaTabela = Tabela(nomesColunas,registros,nomeTabela=path[:-4])
 
         return novaTabela
         
