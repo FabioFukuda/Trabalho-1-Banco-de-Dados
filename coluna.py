@@ -7,22 +7,45 @@ class Coluna:
         return self.registros
 
     def __eq__(self,key):
-        selecao = []
-        for registro in self.registros:
-            if registro == key:
-                selecao.append(True)
-            else:
-                selecao.append(False)
-        return Coluna('',selecao)
+        if type(key) == Coluna:
+            selecao = []
+            for registro in self.registros:
+                if registro in key:
+                    indices = key.index(registro)
+                    selecao.append(indices)
+                else:
+                    selecao.append(False)
+            return Coluna('relacao',selecao)
+        else:   
+            selecao = []
+            for registro in self.registros:
+                if registro == key:
+                    selecao.append(True)
+                else:
+                    selecao.append(False)
+            return Coluna('',selecao)
 
     def __ne__(self,key):
-        selecao = []
-        for registro in self.registros:
-            if registro != key:
-                selecao.append(True)
-            else:
-                selecao.append(False)
-        return Coluna('',selecao)
+        if type(key) == Coluna:
+            selecao = []
+            indicesChaves = key.fazerIndice()
+            for registro in self.registros:
+                indiceIguais = key.index(registro)
+                indicesDiferentes = [indice for indice in indicesChaves if indice not in indiceIguais]
+                if(len(indicesDiferentes) == 0):
+                    selecao.append(False)
+                else:
+                    selecao.append(indicesDiferentes)
+            
+            return Coluna('relacao',selecao)
+        else:
+            selecao = []
+            for registro in self.registros:
+                if registro != key:
+                    selecao.append(True)
+                else:
+                    selecao.append(False)
+            return Coluna('',selecao)
 
     def contido(self, key):
         selecao = []
@@ -170,7 +193,15 @@ class Coluna:
     def __len__(self):
         return len(self.registros)
 
-    
+    def index(self,key):
+        indices = [i for i,valor in enumerate(self.registros) if valor == key]
+        return indices
+
+    def fazerIndice(self):
+        return [i for i in range(len(self.registros))]
+        
+    def __contains__(self,key):
+        return key in self.registros
 '''
 =	Igual
 >	Maior que

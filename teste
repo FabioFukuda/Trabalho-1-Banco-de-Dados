@@ -1,3 +1,6 @@
+from re import T
+
+
 class teste:
     def __init__(self):
         self.n =[1,2,3,4,5,6]
@@ -22,9 +25,7 @@ class teste:
     def __contains__(self, key):
         return key in self.n
     
-a,b = 'abcdefg'.split('ab')
-print(a)
-print(b)
-len(a)
 
+t = teste()
 
+print(9 in t)

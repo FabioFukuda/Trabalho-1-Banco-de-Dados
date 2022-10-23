@@ -4,12 +4,16 @@ class Aplicacao:
     def __init__(self):
         self.leitorCSV = LeitorCSV()
     def rodar(self):
-        dados = self.leitorCSV.lerCSV('employees.csv') 
+        dadosJoao = self.leitorCSV.lerCSV('testeA.csv') 
+        dadosMaria = self.leitorCSV.lerCSV('testeB.csv') 
 
         # %string% -> comeco = False, final = False
         # string% -> comeco = True, final = False
         # %string -> comeco = False, final = True
         
-        selecao = dados['first_name'].like('Mai'.lower(),False,False)
-        resultado = dados[selecao]
+        selecao = dadosJoao['nome'].contido(dadosMaria['nome'])
         pass
+
+if __name__ == '__main__':  
+    app = Aplicacao()
+    app.rodar()
