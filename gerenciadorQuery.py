@@ -24,14 +24,14 @@ class GerenciadorQuery:
         if tabelaCriada == None:
             return None
 
-        pass
+        return tabelaCriada
         
     def executarOrderBy(self,interpretador:Interpretador,tabela:Tabela):
         tabelaCriada = tabela.orderBy(interpretador.interpretacaoOrderBy['nome'] ,
                                       interpretador.interpretacaoOrderBy['direcao'] )
         return tabelaCriada
     def executarSelect(self,interpretador:Interpretador,tabela:Tabela):
-        if interpretador.interpretacaoSelect['nome'] == '*':
+        if interpretador.interpretacaoSelect['nome'][0] == '*':
             return tabela
         colunas = []
         nomesColunas = []

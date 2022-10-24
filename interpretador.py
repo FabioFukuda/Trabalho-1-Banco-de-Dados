@@ -31,12 +31,12 @@ class Interpretador:
         if len(orderBy_)>1:
             direcao = orderBy_[1]
         else:
-            direcao = 'ASC'
+            direcao = 'asc'
 
         interpretacaoOrderBy = {
             'nome': nome,
             'tabela': tabela,
-            'direcao': direcao
+            'direcao': direcao.lower()
         }
         return interpretacaoOrderBy
         

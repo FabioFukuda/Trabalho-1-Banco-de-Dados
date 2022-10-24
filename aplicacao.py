@@ -7,12 +7,10 @@ class Aplicacao:
         self.g = GerenciadorQuery()
 
     def rodar(self):
-        dadosA = self.leitorCSV.lerCSV('testeA.csv') 
-        dadosB = self.leitorCSV.lerCSV('testeB.csv') 
+        dadosA = self.leitorCSV.lerCSV('employees.csv') 
 
         tabelas = {
-            'testeA':dadosA,
-            'testeB':dadosB
+            'employees':dadosA,
         }
 
         '''
@@ -24,14 +22,10 @@ class Aplicacao:
         =	Igual
         '''
             
-        query = 'select ta.nome from testeA as ta order by Id asc'
+        query = 'select birth_date as b,emp_no from employees where emp_no >= 10051 order by emp_no asc'
 
-        self.g.executarQuery(query,tabelas)
-
-        # %string% -> comeco = False, final = False
-        # string% -> comeco = True, final = False
-        # %string -> comeco = False, final = True
-
+        resultado = self.g.executarQuery(query,tabelas)
+        pass
 
 if __name__ == '__main__':  
     app = Aplicacao()

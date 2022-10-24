@@ -39,10 +39,10 @@ class Tabela:
         dictOrdenado = {key: value for key, value in sorted(dictAux.items(), key=lambda item: item[1],reverse = reverse)}
         ordem = list(dictOrdenado.keys())
 
-        registros = [[] for i in range(len(ordem))]
+        registros = [[] for i in range(len(self.nomesColunas))]
         for indice in ordem:
             for indiceColuna in range(len(self.nomesColunas)):
-                registros[indiceColuna].append(self.colunas[indiceColuna])
+                registros[indiceColuna].append(self.colunas[indiceColuna][indice])
         return Tabela(self.nomesColunas,registros,nomeTabela = self.nomeTabela)
 
     def __getitem__(self, key):
