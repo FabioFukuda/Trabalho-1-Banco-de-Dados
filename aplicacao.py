@@ -1,5 +1,6 @@
 from leitorCSV import LeitorCSV
 from gerenciadorQuery import GerenciadorQuery
+from tabelaOperacao import tabelaOperacao
 
 class Aplicacao:
     def __init__(self):
@@ -7,12 +8,21 @@ class Aplicacao:
         self.g = GerenciadorQuery()
 
     def rodar(self):
-        dadosA = self.leitorCSV.lerCSV('employees.csv') 
-
+        '''
+        dadosA = self.leitorCSV.lerCSV('testeA.csv') 
+        dadosB = self.leitorCSV.lerCSV('testeB.csv') 
+        dadosC = self.leitorCSV.lerCSV('testeC.csv') 
         tabelas = {
-            'employees':dadosA,
+            'testeA':dadosA,
+            'testeB':dadosB,
+            'testeC':dadosC
         }
-
+        '''
+        dadosA = self.leitorCSV.lerCSV('employees.csv')
+        tabelas = {
+            'employees':dadosA
+        }
+        #t = tabelaOperacao(tabelas)
         '''
         >	Maior que
         >=	Maior ou igual

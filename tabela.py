@@ -8,7 +8,9 @@ class Tabela:
         for index,coluna in enumerate(nomesColunas):
             self.nomesColunas.append(coluna)
             self.colunas.append(Coluna(coluna,registros[index]))
-    
+    def getTamanho(self):
+        return len(self.colunas[0])
+        
     def juntar(self,tabela,relacao):
         registros = []
         inicioRegistrosTabela2 = len(self.colunas)

@@ -1,5 +1,5 @@
-nome,Id
-Joao,3
-Matias,1
-Laura,0
-Luana,3
+nome,Id,numero
+Joao,3,5
+Matias,1,8
+Laura,0,9
+Luana,3,0

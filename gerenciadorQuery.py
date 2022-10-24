@@ -70,7 +70,6 @@ class GerenciadorQuery:
         resultadoOperacao1 =self.executaOperacao(interpretador,tabelas,0)
         if resultadoOperacao1 is None:
             return None
-
         if 'and' in interpretador.interpretacaoWhere:
             resultadoOperacao2 = self.executaOperacao(interpretador,tabelas,2)
             selecao = (resultadoOperacao1) & (resultadoOperacao2)
@@ -133,6 +132,7 @@ class GerenciadorQuery:
                     contador+=1
             if contador!=1:
                 return None
+                
         return self.operacao(campo1,nomeTabela1,campo2,nomeTabela2,interpretador.interpretacaoWhere[indiceOp]['operacao'],ehTabela,tabelas)
 
     def operacao(self,campo1,nomeTabela1,campo2,nomeTabela2,operador,ehTabela,tabelas):

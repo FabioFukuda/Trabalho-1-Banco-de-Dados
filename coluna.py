@@ -2,7 +2,8 @@ class Coluna:
     def __init__(self,nome:str,registros:list = []):
         self.nome = nome
         self.registros = registros
-    
+        self.relacao = False
+        self.tabelasRelacao = []
     def toList(self):
         return self.registros
 
@@ -15,7 +16,10 @@ class Coluna:
                     selecao.append(indices)
                 else:
                     selecao.append(False)
-            return Coluna('relacao',selecao)
+            novaColuna = Coluna('relacao',selecao)
+            novaColuna.relacao = True
+            novaColuna.tabelasRelacao = [self.nome,key.nome]
+
         else:   
             selecao = []
             for registro in self.registros:
