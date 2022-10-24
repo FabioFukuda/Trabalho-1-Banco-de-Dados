@@ -6,18 +6,56 @@ class GerenciadorQuery:
         interpretador = Interpretador()
         interpretador.interpretar(query)
 
-        tabelasFrom = self.executarFrom(interpretador,tabelas)
-        if tabelasFrom == None:
-            return 
+        tabelaCriada = self.executarFrom(interpretador,tabelas)
+        if tabelaCriada == None:
+            return None
 
         if interpretador.interpretacaoWhere:
-            tabelasWhere = self.executarWhere(interpretador,tabelasFrom)
-            if tabelasWhere == None:
-                return
-        
+            tabelaCriada = self.executarWhere(interpretador,tabelaCriada)
+            if tabelaCriada is None:
+                return None
+        else:
+            tabelaCriada = list(tabelaCriada.values())[0]
+
+        if interpretador.interpretacaoOrderBy != None:
+            tabelaCriada = self.executarOrderBy(interpretador,tabelaCriada)
     
-    def organizarAlias(self,interpretador):
+        tabelaCriada = self.executarSelect(interpretador,tabelaCriada)
+        if tabelaCriada == None:
+            return None
+
         pass
+        
+    def executarOrderBy(self,interpretador:Interpretador,tabela:Tabela):
+        tabelaCriada = tabela.orderBy(interpretador.interpretacaoOrderBy['nome'] ,
+                                      interpretador.interpretacaoOrderBy['direcao'] )
+        return tabelaCriada
+    def executarSelect(self,interpretador:Interpretador,tabela:Tabela):
+        if interpretador.interpretacaoSelect['nome'] == '*':
+            return tabela
+        colunas = []
+        nomesColunas = []
+        for campo in range(len(interpretador.interpretacaoSelect['nome'])):
+            if interpretador.interpretacaoSelect['tabela'][campo] == '':
+                nome = interpretador.interpretacaoSelect['nome'][campo]
+                indice = tabela.nomesColunas.index(nome)
+                colunas.append(tabela.colunas[indice].registros)
+                nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+            else:
+                aliasTabela = interpretador.interpretacaoSelect['tabela'][campo]
+                nomeTabela = ''
+                if aliasTabela in interpretador.interpretacaoFrom['alias']: 
+                    indiceTabela = interpretador.interpretacaoFrom['alias'].index(aliasTabela)
+                    nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
+                if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
+                    nome = interpretador.interpretacaoSelect['nome'][campo]
+                    indice = tabela.nomesColunas.index(nome)
+                    colunas.append(tabela.colunas[indice].registros)
+                    nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+        return Tabela(nomesColunas,colunas,nomeTabela = tabela.nomeTabela)
+        
+
+         
     def executarFrom(self,interpretador:Interpretador,tabelas):
         tabelasFrom = {}
         for nomeTabela in interpretador.interpretacaoFrom['tabela']:
@@ -29,8 +67,10 @@ class GerenciadorQuery:
 
     def executarWhere(self,interpretador:Interpretador,tabelas):
     
-
         resultadoOperacao1 =self.executaOperacao(interpretador,tabelas,0)
+        if resultadoOperacao1 is None:
+            return None
+
         if 'and' in interpretador.interpretacaoWhere:
             resultadoOperacao2 = self.executaOperacao(interpretador,tabelas,2)
             selecao = (resultadoOperacao1) & (resultadoOperacao2)
@@ -48,15 +88,16 @@ class GerenciadorQuery:
             contador = 0
             nomeTabela1 = ''
             for tabela in tabelas.values():
-                if campo1 in tabela.nomesColunas():
+                if campo1 in tabela.nomesColunas:
                     contador+=1
-                    nomeTabela1 = tabela.nome
+                    nomeTabela1 = tabela.nomeTabela
             if contador!=1:
                 return None
         else:
             nomeTabela1 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela1)]
 
         return tabelas[nomeTabela1][selecao]
+
     def executaOperacao(self,interpretador:Interpretador,tabelas,indiceOp):
         aliasTabela1 = interpretador.interpretacaoWhere[indiceOp]['tabela1']
         nomeTabela1 = ''
@@ -66,9 +107,9 @@ class GerenciadorQuery:
             contador = 0
             nomeTabela1 = ''
             for tabela in tabelas.values():
-                if campo1 in tabela.nomesColunas():
+                if campo1 in tabela.nomesColunas:
                     contador+=1
-                    nomeTabela1 = tabela.nome
+                    nomeTabela1 = tabela.nomeTabela
             if contador!=1:
                 return None
         else:
@@ -92,7 +133,8 @@ class GerenciadorQuery:
                     contador+=1
             if contador!=1:
                 return None
-        return self.operacao(campo1,nomeTabela1,campo2,nomeTabela2,interpretador.interpretacaoWhere[0]['operacao'],ehTabela,tabelas)
+        return self.operacao(campo1,nomeTabela1,campo2,nomeTabela2,interpretador.interpretacaoWhere[indiceOp]['operacao'],ehTabela,tabelas)
+
     def operacao(self,campo1,nomeTabela1,campo2,nomeTabela2,operador,ehTabela,tabelas):
         selecao = None
         match operador:

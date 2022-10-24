@@ -150,7 +150,7 @@ class Coluna:
     def __ge__(self,key):
         selecao = []
         for registro in self.registros:
-                if float(registro) < float(key):
+                if float(registro) >= float(key):
                     selecao.append(True)
                 else:
                     selecao.append(False)
@@ -160,7 +160,7 @@ class Coluna:
     def __le__(self,key):
         selecao = []
         for registro in self.registros:
-                if float(registro) < float(key):    
+                if float(registro) <= float(key):    
                     selecao.append(True)
                 else:
                     selecao.append(False)
@@ -209,6 +209,7 @@ class Coluna:
 >=	Maior ou igual
 <=	Menor ou igual
 <> ou !=	Diferente de
+
 IN	Incluindo (múltiplos valores)
 NOT IN	Excluindo (múltiplos valores)
 BETWEEN	Entre dois valores

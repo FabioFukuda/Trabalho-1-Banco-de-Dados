@@ -28,6 +28,23 @@ class Tabela:
                         registros[inicioRegistrosTabela2+indiceColuna2].append(coluna2[reg2])
         return Tabela(nomesColunas,registros)
 
+    def orderBy(self,nomeColuna,ordem):
+        indiceColuna = self.nomesColunas.index(nomeColuna)
+        indices = [i for i in range(len(self.colunas[indiceColuna]))]
+        colunas = [registro.lower() for registro in self.colunas[indiceColuna]]
+        dictAux = dict(zip(indices,colunas))
+        reverse = False
+        if ordem == 'desc':
+            reverse = True
+        dictOrdenado = {key: value for key, value in sorted(dictAux.items(), key=lambda item: item[1],reverse = reverse)}
+        ordem = list(dictOrdenado.keys())
+
+        registros = [[] for i in range(len(ordem))]
+        for indice in ordem:
+            for indiceColuna in range(len(self.nomesColunas)):
+                registros[indiceColuna].append(self.colunas[indiceColuna])
+        return Tabela(self.nomesColunas,registros,nomeTabela = self.nomeTabela)
+
     def __getitem__(self, key):
         if type(key) == list:
             indices = []
@@ -45,7 +62,7 @@ class Tabela:
             for indice in indices:
                 for numColuna,coluna in enumerate(self.colunas):
                     registros[numColuna].append(coluna[indice])    
-            return Tabela(self.nomesColunas,registros)
+            return Tabela(self.nomesColunas,registros,nomeTabela=self.nomeTabela)
         else:
             index = self.nomesColunas.index(key)
             return self.colunas[index]
