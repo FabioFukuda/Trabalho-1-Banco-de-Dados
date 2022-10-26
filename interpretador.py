@@ -20,9 +20,11 @@ class Interpretador:
     def interpretarOrderBy(self,orderBy_):
         if len(orderBy_) == 0:
             return None
+
         nome = ''
         tabela = ''
         direcao = ''
+
         if '.' in orderBy_[0]:
             tabela,nome = orderBy_[0].split('.')
         else:
@@ -38,11 +40,13 @@ class Interpretador:
             'tabela': tabela,
             'direcao': direcao.lower()
         }
+
         return interpretacaoOrderBy
         
     def interpretarWhere(self,where_):
         if len(where_) == 0:
             return None
+            
         '''
         where n.idade >= 3
 
@@ -56,7 +60,86 @@ class Interpretador:
         LIKE	Busca um padrão parecido
 
         ''' 
+
         interpretacaoWhere = []
+        where = []
+        #Verifica se a condicao do where está contatenada (ex: idade>=4, ao invés de idade >= 4)
+        for filtro in where_:
+            if len(filtro)<3:
+                novo_filtro = []
+                for operacao in filtro:
+                    if len(operacao) >=2:
+                        flag = False
+                        #Tenta encontrar os operadores <= e >= nos operadores
+                        for operador in ['>=','<=','<>','!=']:
+                            if(flag):
+                                break
+                            if operador in operacao:
+                                flag = True
+                                index = operacao.find(operador)
+                                valor1 = '' 
+                                op = ''
+                                valor2 = '' 
+                                # idade>= (operador grudado no primeiro valor)
+                                if index !=0:
+                                    valor1 = operacao[:index]
+                                    op = operacao[index:index+2]
+                                    # O segundo valor também está grudado (ex:idade>=4)
+                                    novo_filtro.append(valor1)
+                                    novo_filtro.append(op)
+                                    if len(operacao) != index+2:
+                                        valor2 = operacao[index+2:]
+                                        novo_filtro.append(valor2)
+                                # Se o tamanho da operacao é maior que 2, e o primeiro valor não está grudado,
+                                #então o segundo valor está grudado.
+                                else:
+                                    op = operacao[index:index+2]
+                                    valor2 = operacao[index+2:]
+                                    novo_filtro.append(op)
+                                    novo_filtro.append(valor2)
+                        for operador in ['>','<','=']:
+                            if(flag):
+                                break
+                            if operador in operacao:
+                                flag = True
+                                index = operacao.find(operador)
+                                valor1 = '' 
+                                op = ''
+                                valor2 = '' 
+                                # idade>= (operador grudado no primeiro valor)
+                                if index !=0:
+                                    valor1 = operacao[:index]
+                                    op = operacao[index:index+1]
+                                    novo_filtro.append(valor1)
+                                    novo_filtro.append(op)
+                                    # O segundo valor também está grudado (ex:idade>=4)
+                                    if len(operacao) != index+1:
+                                        valor2 = operacao[index+1:]
+                                        novo_filtro.append(valor2)
+                                # Se o tamanho da operacao é maior que 2, e o primeiro valor não está grudado,
+                                #então o segundo valor está grudado.
+                                else:
+                                    op = operacao[index:index+1]
+                                    valor2 = operacao[index+1:]
+                                    novo_filtro.append(op)
+                                    novo_filtro.append(valor2)
+                        if not flag:
+                            novo_filtro.append(operacao)
+                    else:
+                        novo_filtro.append(operacao)
+                where.append(novo_filtro)
+            else:
+                where.append(filtro)
+        where_ = where
+        '''
+                >	Maior que
+                >=	Maior ou igual
+                <	Menor que
+                <=	Menor ou igual
+                <> ou !=	Diferente de
+                =	Igual
+            '''
+            
         for operacao in where_:
             if operacao == 'and' or operacao == 'or':
                 interpretacaoWhere.append(operacao)

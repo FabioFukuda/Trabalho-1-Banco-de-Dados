@@ -32,7 +32,7 @@ class Aplicacao:
         =	Igual
         '''
             
-        query = 'select birth_date as b,emp_no from employees where emp_no >= 10051 order by emp_no asc'
+        query = 'select birth_date as b,emp_no from employees where nome.emp_no >10051 order by emp_no asc'
 
         resultado = self.g.executarQuery(query,tabelas)
         pass
