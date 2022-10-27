@@ -7,26 +7,25 @@ class GerenciadorQuery:
         interpretador.interpretar(query)
 
         tabelaCriada = self.executarFrom(interpretador,tabelas)
-        if tabelaCriada == None:
+        if tabelaCriada is None:
             return None
 
         if interpretador.interpretacaoWhere:
             tabelaCriada = self.executarWhere(interpretador,tabelaCriada)
             if tabelaCriada is None:
                 return None
-        else:
-            tabelaCriada = list(tabelaCriada.values())[0]
 
-        if interpretador.interpretacaoOrderBy != None:
+        if interpretador.interpretacaoOrderBy is not None:
             tabelaCriada = self.executarOrderBy(interpretador,tabelaCriada)
-    
+            if tabelaCriada is None:
+                return 
         tabelaCriada = self.executarSelect(interpretador,tabelaCriada)
-        if tabelaCriada == None:
-            return None
-
+        
         return tabelaCriada
         
     def executarOrderBy(self,interpretador:Interpretador,tabela:Tabela):
+        if interpretador.interpretacaoOrderBy['tabela'] != '' and interpretador.interpretacaoOrderBy['tabela'] != tabela.nomeTabela:
+            return None
         tabelaCriada = tabela.orderBy(interpretador.interpretacaoOrderBy['nome'] ,
                                       interpretador.interpretacaoOrderBy['direcao'] )
         return tabelaCriada
@@ -37,71 +36,117 @@ class GerenciadorQuery:
         nomesColunas = []
         for campo in range(len(interpretador.interpretacaoSelect['nome'])):
             if interpretador.interpretacaoSelect['tabela'][campo] == '':
-                nome = interpretador.interpretacaoSelect['nome'][campo]
-                indice = tabela.nomesColunas.index(nome)
-                colunas.append(tabela.colunas[indice].registros)
-                nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
-            else:
-                aliasTabela = interpretador.interpretacaoSelect['tabela'][campo]
-                nomeTabela = ''
-                if aliasTabela in interpretador.interpretacaoFrom['alias']: 
-                    indiceTabela = interpretador.interpretacaoFrom['alias'].index(aliasTabela)
-                    nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
-                if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
+                try:
                     nome = interpretador.interpretacaoSelect['nome'][campo]
                     indice = tabela.nomesColunas.index(nome)
                     colunas.append(tabela.colunas[indice].registros)
                     nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+                except:
+                    return 
+            else:
+                aliasTabela = interpretador.interpretacaoSelect['tabela'][campo]
+                nomeTabela = ''
+                try:
+                    if aliasTabela in interpretador.interpretacaoFrom['alias']: 
+                        indiceTabela = interpretador.interpretacaoFrom['alias'].index(aliasTabela)
+                        nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
+                    if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
+                        nome = interpretador.interpretacaoSelect['nome'][campo]
+                        indice = tabela.nomesColunas.index(nome)
+                        colunas.append(tabela.colunas[indice].registros)
+                        nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+                except:
+                    return
         return Tabela(nomesColunas,colunas,nomeTabela = tabela.nomeTabela)
         
 
          
     def executarFrom(self,interpretador:Interpretador,tabelas):
-        tabelasFrom = {}
+        tabelaFrom = None
         for nomeTabela in interpretador.interpretacaoFrom['tabela']:
             try:
-                tabelasFrom[nomeTabela] = tabelas[nomeTabela]
+                tabelaFrom = tabelas[nomeTabela]
+                break
             except:
                 return None
-        return tabelasFrom
+        return tabelaFrom
 
-    def executarWhere(self,interpretador:Interpretador,tabelas):
+    def executarWhere(self,interpretador:Interpretador,tabela:Tabela):
     
-        resultadoOperacao1 =self.executaOperacao(interpretador,tabelas,0)
-        if resultadoOperacao1 is None:
+        campo,nomeTabela1,valor,operacao = self.organizaInstrucoes(interpretador,tabela,0)
+
+        if campo == None:
+            return
+
+        if(nomeTabela1!=tabela.nomeTabela):
             return None
+            
+        resultadoOperacao1 = self.operacao(campo,valor,operacao,tabela)
+        nomeTabela2 = ''
         if 'and' in interpretador.interpretacaoWhere:
-            resultadoOperacao2 = self.executaOperacao(interpretador,tabelas,2)
+            campo,nomeTabela2,valor,operacao = self.organizaInstrucoes(interpretador,tabela,2)
+            resultadoOperacao2 = self.operacao(campo,valor,operacao,tabela)
             selecao = (resultadoOperacao1) & (resultadoOperacao2)
         elif 'or' in interpretador.interpretacaoWhere:
-            resultadoOperacao2 = self.executaOperacao(interpretador,tabelas,2)
+            campo,nomeTabela2,valor,operacao = self.organizaInstrucoes(interpretador,tabela,2)
+            resultadoOperacao2 =  self.operacao(campo,valor,operacao,tabela)
             selecao = (resultadoOperacao1) | (resultadoOperacao2)
         else:
             selecao = resultadoOperacao1
 
-        aliasTabela1 = interpretador.interpretacaoWhere[0]['tabela1']
+        if nomeTabela1!=nomeTabela2 and nomeTabela2 != '':
+            return None
+
+        return tabela[selecao]
+
+    def organizaInstrucoes(self,interpretador:Interpretador,tabela:Tabela,indiceOp):
+        aliasTabela1 = interpretador.interpretacaoWhere[indiceOp]['tabela1']
         nomeTabela1 = ''
-        campo1 = interpretador.interpretacaoWhere[0]['valor1']
+        campo1 = interpretador.interpretacaoWhere[indiceOp]['valor1']
+        campo1EhValor = False
 
-        if aliasTabela1 == '':
-            contador = 0
-            nomeTabela1 = ''
-            for tabela in tabelas.values():
-                if campo1 in tabela.nomesColunas:
-                    contador+=1
-                    nomeTabela1 = tabela.nomeTabela
-            if contador!=1:
-                return None
+        if aliasTabela1 != '':
+            if aliasTabela1!='STRING' and aliasTabela1!='NUMERO': 
+                #Campo é um atributo da tabela.
+                nomeTabela1 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela1)]
+
+            #campo ou é string, ou é valor.
+            else:
+                campo1EhValor = True
+        #Então é um atributo da tabela, sem alias.
         else:
-            nomeTabela1 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela1)]
+            contador = 0
+            aliasTabela1 = ''
+            nomeTabela1 = tabela.nomeTabela
 
-        return tabelas[nomeTabela1][selecao]
+        aliasTabela2 = interpretador.interpretacaoWhere[indiceOp]['tabela2']
+        nomeTabela2 = ''
+        campo2 = interpretador.interpretacaoWhere[indiceOp]['valor2']
+        campo2EhValor = False
 
+        if aliasTabela2 != '':
+            if aliasTabela2!='STRING' and aliasTabela2!='NUMERO': 
+                nomeTabela2 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela2)]
+            else:
+                campo2EhValor = True
+        else:
+            contador = 0
+            nomeTabela2 = tabela.nomeTabela
+
+        if not campo1EhValor and campo2EhValor:
+            return campo1,nomeTabela1,campo2,interpretador.interpretacaoWhere[indiceOp]['operacao']
+        elif not campo2EhValor and campo1EhValor:
+            return campo2,nomeTabela2,campo1,interpretador.interpretacaoWhere[indiceOp]['operacao']
+        else:
+            return None,None,None,None
+    ''' 
     def executaOperacao(self,interpretador:Interpretador,tabelas,indiceOp):
+
         aliasTabela1 = interpretador.interpretacaoWhere[indiceOp]['tabela1']
         nomeTabela1 = ''
         campo1 = interpretador.interpretacaoWhere[indiceOp]['valor1']
 
+        
         if aliasTabela1 == '':
             contador = 0
             nomeTabela1 = ''
@@ -134,46 +179,25 @@ class GerenciadorQuery:
                 return None
                 
         return self.operacao(campo1,nomeTabela1,campo2,nomeTabela2,interpretador.interpretacaoWhere[indiceOp]['operacao'],ehTabela,tabelas)
-
-    def operacao(self,campo1,nomeTabela1,campo2,nomeTabela2,operador,ehTabela,tabelas):
+    '''
+    
+    def operacao(self,campo,valor,operador,tabela):
         selecao = None
         match operador:
             case '>':
-                if(ehTabela):
-                    return None
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] > campo2
+                selecao = tabela[campo] > valor
             case '>=':
-                if(ehTabela):
-                    return None
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] >= campo2
+                selecao = tabela[campo] >= valor
             case '<':
-                if(ehTabela):
-                    return None
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] < campo2
+                selecao = tabela[campo] < valor
             case '<=':
-                if(ehTabela):
-                    return None
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] <= campo2
+                selecao = tabela[campo] <= valor
             case '<>':
-                if(ehTabela):
-                    selecao = tabelas[nomeTabela1][campo1] != tabelas[nomeTabela2][campo2]
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] != campo2
+                selecao = tabela[campo] != valor
             case '!=':
-                if(ehTabela):
-                    selecao = tabelas[nomeTabela1][campo1] != tabelas[nomeTabela2][campo2]
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] != campo2
-                    pass
+                selecao = tabela[campo] != valor
             case '=':
-                if(ehTabela):
-                    selecao = tabelas[nomeTabela1][campo1] == tabelas[nomeTabela2][campo2]
-                else:
-                    selecao = tabelas[nomeTabela1][campo1] == campo2
+                selecao = tabela[campo] == valor
         return selecao
         
             

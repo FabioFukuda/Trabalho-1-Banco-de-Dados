@@ -22,13 +22,5 @@ def produtoCartesianoRecursivo(tabelas:list):
         else:
             return tabelas
 
-tabela1 = [[1,2,3],[1,2,3],[4,5,6],[7,8,9]]
-tabela2 = [[1,2,3],['a','b','c'],['d','f','g'],['h','i','j']]
-tabela3 = [[1,2,3],['k','l','m'],['n','o','p'],['q','r','s']]
-
-tabelas = []
-tabelas.append(tabela1)
-tabelas.append(tabela2)
-tabelas.append(tabela3)
-tabelaCross = produtoCartesianoRecursivo(tabelas)
-print(tabelaCross)
+a = [1,2,3,4]
+print(a.index(5))

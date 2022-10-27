@@ -1,5 +1,5 @@
 from tabela import Tabela
-
+import os
 class LeitorCSV:
     def __init__(self):
         pass
@@ -16,8 +16,8 @@ class LeitorCSV:
             else:
                 for indice,campo in enumerate(campos):
                     registros[indice].append(campo)
-
-        novaTabela = Tabela(nomesColunas,registros,nomeTabela=path[:-4])
+        print(os.path.basename(path))
+        novaTabela = Tabela(nomesColunas,registros,nomeTabela=os.path.basename(path)[:-4])
 
         return novaTabela
         

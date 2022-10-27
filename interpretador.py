@@ -151,16 +151,24 @@ class Interpretador:
             tabela2  = ''
             op = ''
 
-            if '.' in operacao[0]:
-                tabela1,valor1 = operacao[0].split('.')
-            else:
+            if operacao[0].isnumeric():
+                float(operacao[0])
+                tabela1 = "NUMERO"
                 valor1 = operacao[0]
-
-            try:
+            else: 
+                if '.' in operacao[0]:
+                    tabela1,valor1 = operacao[0].split('.')
+                elif operacao[0].find("'")!=-1 or operacao[0].find('"')!=-1:
+                    tabela1 = "STRING"
+                    valor1 = operacao[0][1:-1]
+                else:
+                    tabela1 = ""
+                    valor1 = operacao[0] 
+            if operacao[2].isnumeric():
                 float(operacao[2])
                 tabela2 = "NUMERO"
                 valor2 = operacao[2]
-            except: 
+            else: 
                 if '.' in operacao[2]:
                     tabela2,valor2 = operacao[2].split('.')
                 elif operacao[2].find("'")!=-1 or operacao[2].find('"')!=-1:
