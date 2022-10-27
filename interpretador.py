@@ -65,7 +65,7 @@ class Interpretador:
         where = []
         #Verifica se a condicao do where está contatenada (ex: idade>=4, ao invés de idade >= 4)
         for filtro in where_:
-            if len(filtro)<3:
+            if len(filtro)<3 and filtro!='and' and filtro!='or':
                 novo_filtro = []
                 for operacao in filtro:
                     if len(operacao) >=2:

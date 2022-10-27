@@ -21,6 +21,4 @@ def produtoCartesianoRecursivo(tabelas:list):
             return produtoCartesianoRecursivo(tabelas)
         else:
             return tabelas
-
-a = [1,2,3,4]
-print(a.index(5))
+print('123 asdasdasdaAA'.lower())

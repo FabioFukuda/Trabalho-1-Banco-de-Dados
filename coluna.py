@@ -23,7 +23,7 @@ class Coluna:
         else:   
             selecao = []
             for registro in self.registros:
-                if registro == key:
+                if registro.lower() == key.lower():
                     selecao.append(True)
                 else:
                     selecao.append(False)
@@ -45,7 +45,7 @@ class Coluna:
         else:
             selecao = []
             for registro in self.registros:
-                if registro != key:
+                if registro.lower() != key.lower():
                     selecao.append(True)
                 else:
                     selecao.append(False)
@@ -206,18 +206,3 @@ class Coluna:
         
     def __contains__(self,key):
         return key in self.registros
-'''
-=	Igual
->	Maior que
-<	Menor que
->=	Maior ou igual
-<=	Menor ou igual
-<> ou !=	Diferente de
-
-IN	Incluindo (múltiplos valores)
-NOT IN	Excluindo (múltiplos valores)
-BETWEEN	Entre dois valores
-LIKE	Busca um padrão parecido
-IS NULL	Traz todos os valores nulos
-IS NOT NULL	Traz todos os valores que não são nulos
-'''
