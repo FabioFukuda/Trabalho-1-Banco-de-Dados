@@ -1,14 +1,15 @@
 from tabela import Tabela
 import os
+
 class LeitorCSV:
     def __init__(self):
         pass
     def lerCSV(self,path:str,sep = ','):
-        dados = open(path,'r')
+        dados = open(path,'r',encoding="utf8")
         registros = []
         nomesColunas = []
         for indice,linha in enumerate(dados):
-            campos = linha.replace('\n','').split(',')
+            campos = linha.replace('\n','').split(sep)
             if indice==0:
                 nomesColunas = campos
                 for i in range(len(campos)):

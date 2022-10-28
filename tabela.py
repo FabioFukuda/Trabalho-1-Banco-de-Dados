@@ -4,9 +4,11 @@ class Tabela:
     def __init__(self,nomesColunas:list,registros=None,nomeTabela=None):
         self.nomeTabela = nomeTabela
         self.nomesColunas = []
+        self.nomesColunasLower = []
         self.colunas = []
         for index,coluna in enumerate(nomesColunas):
             self.nomesColunas.append(coluna)
+            self.nomesColunasLower.append(coluna.lower())
             self.colunas.append(Coluna(coluna,registros[index]))
             
     def getTamanho(self):
@@ -58,7 +60,6 @@ class Tabela:
             for indice in indices:
                 registros.append(self.colunas[indice].toList())
             return Tabela(key,registros)
-            
         elif type(key) == Coluna:
             indices = [indice for indice,boleano in enumerate(key) if boleano]
             registros = [[] for i in range(len(self.colunas))]
@@ -67,7 +68,8 @@ class Tabela:
                     registros[numColuna].append(coluna[indice])    
             return Tabela(self.nomesColunas,registros,nomeTabela=self.nomeTabela)
         else:
-            index = self.nomesColunas.index(key)
+
+            index = self.nomesColunasLower.index(key)
             return self.colunas[index]
         
 

@@ -8,8 +8,8 @@ class Aplicacao:
         self.leitorCSV = LeitorCSV()
         self.gerenciadorQuery = GerenciadorQuery()
         self.tabelas = {}
-    def rodar(self):
         
+    def rodar(self):
         entrada = self.lerInput()
         while entrada!='3':
             match entrada:
@@ -20,15 +20,10 @@ class Aplicacao:
 
             entrada = self.lerInput()
         
-        '''
-        tabela = self.leitorCSV.lerCSV('C:\\Users\\FSFKD\\Documents\\Faculdade\\BD\\Repositorio Trabalho 1\\Trabalho1BD\\employees.csv')
-        self.tabelas[tabela.nomeTabela] = tabela
-        self.fazerQueries()
-        '''
     def importarArquivo(self):
-        entrada = input('Digite o caminho do csv (ex:C:\\1Users\\Usuario\\Documents\\tabela.csv)\n')
+        entrada = input('Digite o caminho do csv (ex:C:\\Users\\Usuario\\Documents\\tabela.csv)\n')
         try:
-            tabela = self.leitorCSV.lerCSV(entrada)
+            tabela = self.leitorCSV.lerCSV(entrada,sep=',')
             self.tabelas[tabela.nomeTabela] = tabela
         except:
             print('Falha na leitura.')

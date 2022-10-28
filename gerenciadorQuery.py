@@ -4,7 +4,7 @@ from tabela import Tabela
 class GerenciadorQuery:
     def executarQuery(self,query:str,tabelas):
         interpretador = Interpretador()
-        interpretador.interpretar(query)
+        interpretador.interpretar(query.lower())
 
         tabelaCriada = self.executarFrom(interpretador,tabelas)
         if tabelaCriada is None:
@@ -38,7 +38,7 @@ class GerenciadorQuery:
             if interpretador.interpretacaoSelect['tabela'][campo] == '':
                 try:
                     nome = interpretador.interpretacaoSelect['nome'][campo]
-                    indice = tabela.nomesColunas.index(nome)
+                    indice = tabela.nomesColunasLower.index(nome)
                     colunas.append(tabela.colunas[indice].registros)
                     nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
                 except:
@@ -52,7 +52,7 @@ class GerenciadorQuery:
                         nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
                     if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
                         nome = interpretador.interpretacaoSelect['nome'][campo]
-                        indice = tabela.nomesColunas.index(nome)
+                        indice = tabela.nomesColunasLower.index(nome)
                         colunas.append(tabela.colunas[indice].registros)
                         nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
                 except:
@@ -115,7 +115,6 @@ class GerenciadorQuery:
                 campo1EhValor = True
         #Então é um atributo da tabela, sem alias.
         else:
-            contador = 0
             aliasTabela1 = ''
             nomeTabela1 = tabela.nomeTabela
 
@@ -130,7 +129,6 @@ class GerenciadorQuery:
             else:
                 campo2EhValor = True
         else:
-            contador = 0
             nomeTabela2 = tabela.nomeTabela
 
         if not campo1EhValor and campo2EhValor:
@@ -139,47 +137,6 @@ class GerenciadorQuery:
             return campo2,nomeTabela2,campo1,interpretador.interpretacaoWhere[indiceOp]['operacao']
         else:
             return None,None,None,None
-    ''' 
-    def executaOperacao(self,interpretador:Interpretador,tabelas,indiceOp):
-
-        aliasTabela1 = interpretador.interpretacaoWhere[indiceOp]['tabela1']
-        nomeTabela1 = ''
-        campo1 = interpretador.interpretacaoWhere[indiceOp]['valor1']
-
-        
-        if aliasTabela1 == '':
-            contador = 0
-            nomeTabela1 = ''
-            for tabela in tabelas.values():
-                if campo1 in tabela.nomesColunas:
-                    contador+=1
-                    nomeTabela1 = tabela.nomeTabela
-            if contador!=1:
-                return None
-        else:
-            nomeTabela1 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela1)]
-
-        aliasTabela2 = interpretador.interpretacaoWhere[indiceOp]['tabela2']
-        nomeTabela2 = ''
-        campo2 = interpretador.interpretacaoWhere[indiceOp]['valor2']
-        ehTabela = True
-
-        if aliasTabela2 != '':
-            if aliasTabela2!='STRING' and aliasTabela2!='NUMERO': 
-                nomeTabela2 = interpretador.interpretacaoFrom['tabela'][interpretador.interpretacaoFrom['alias'].index(aliasTabela2)]
-            else:
-                ehTabela = False
-        else:
-            contador = 0
-            nomeTabela2 = ''
-            for tabela in tabelas.values():
-                if campo2 in tabela.nomesColunas:
-                    contador+=1
-            if contador!=1:
-                return None
-                
-        return self.operacao(campo1,nomeTabela1,campo2,nomeTabela2,interpretador.interpretacaoWhere[indiceOp]['operacao'],ehTabela,tabelas)
-    '''
     
     def operacao(self,campo,valor,operador,tabela):
         selecao = None
