@@ -1,21 +1,40 @@
+'''
+AUTORES: FABIO SEITI FUKUDA
+         PEDRO AUGUSTO TORTOLA PEREIRA
+'''
+
 class Coluna:
     def __init__(self,nome:str,registros:list = []):
         self.nome = nome
         self.registros = registros
         self.relacao = False
         self.tabelasRelacao = []
-        
     def toList(self):
         return self.registros
-
+        
     def __eq__(self,key):
-        selecao = []
-        for registro in self.registros:
-            if registro.lower() == key.lower():
-                selecao.append(True)
-            else:
-                selecao.append(False)
-        return Coluna('',selecao)
+        if type(key) == Coluna:
+            hashTable = {}
+            for index in range(len(self.registros)):
+                if hashTable.get(self.registros[index]) is None:
+                    hashTable[self.registros[index]] = [[index],[]]
+                else:
+                    hashTable[self.registros[index]][0].append(index)
+
+            for index in range(len(key.registros)):
+                if hashTable.get(key.registros[index]) is None:
+                    continue
+                else:
+                    hashTable[key.registros[index]][1].append(index)
+            return list(hashTable.values())
+        else:
+            selecao = []
+            for registro in self.registros:
+                if registro.lower() == key.lower():
+                    selecao.append(True)
+                else:
+                    selecao.append(False)
+            return Coluna('',selecao)
 
     def __ne__(self,key):
         selecao = []

@@ -1,3 +1,8 @@
+'''
+AUTORES: FABIO SEITI FUKUDA
+         PEDRO AUGUSTO TORTOLA PEREIRA
+'''
+
 from copy import deepcopy
 from tabela import Tabela
 
@@ -187,6 +192,32 @@ class Interpretador:
                 'operacao':op
             })
 
+        for operacao in interpretacaoWhere:
+            if isinstance(operacao, dict):
+                aliasTabela1 = operacao['tabela1']
+                campo1EhValor = False
+
+                if  aliasTabela1 != '' and aliasTabela1=='STRING' or aliasTabela1=='NUMERO': 
+                    campo1EhValor = True
+
+                aliasTabela2 = operacao['tabela2']
+                campo2EhValor = False
+
+                if aliasTabela2 != '' and aliasTabela2=='STRING' or aliasTabela2=='NUMERO': 
+                    campo2EhValor = True
+
+                if not campo1EhValor and campo2EhValor:
+                    operacao['join'] = False
+                elif not campo2EhValor and campo1EhValor:
+                    operacao['valor1'],operacao['valor2'] = operacao['valor2'],operacao['valor1']
+                    operacao['tabela1'],operacao['tabela2'] = operacao['tabela2'],operacao['tabela1']
+                    operacao['join'] = False
+                elif not campo1EhValor and not campo1EhValor:
+                    operacao['join'] = True
+                else:  
+                    operacao['join'] = True              
+                    break
+                    
         return interpretacaoWhere
 
     def interpretarSelect(self,select_):
@@ -226,42 +257,124 @@ class Interpretador:
             interpretacaoSelect['alias'].append(alias)     
             interpretacaoSelect['nome'].append(nome)
             interpretacaoSelect['tabela'].append(tabela)
+
         return interpretacaoSelect
 
     def interpretarFrom(self,from_):
         interpretacaoFrom = {'tabela':[],
-                        'alias':[]}
+                        'alias':[],
+                        'joinEn':False,
+                        'join':{'tabela':[],'att':[],'op':[]}}
         
         camposSeparados = []
-        campo = []
+
         for comando in from_:
             if comando == ',':
-                camposSeparados.append(campo)
-                campo = []
+                continue
             else:
-                campo.append(comando)
-        camposSeparados.append(campo)
+                camposSeparados.append(comando)
 
+        relacao = []
+        proximoCampo = 'tabela'
         for campo in camposSeparados:
-
-            proximoCampo = 'tabela'
+            
             tabela = ''
             alias = ''
+        
+            if campo == 'inner' or campo == 'join':
+                proximoCampo = 'tabela' 
+                interpretacaoFrom['joinEn'] = True
+                continue
+            elif campo == 'on':
+                proximoCampo = 'relacao'
+                continue
+            if proximoCampo == 'tabela':
+                interpretacaoFrom['tabela'].append(campo)
+                interpretacaoFrom['alias'].append(campo) 
+                continue
+            if proximoCampo == 'relacao':
+                relacao.append(campo)
 
-            for comando in campo:
-                if proximoCampo == 'tabela':
-                    tabela = comando
-                    proximoCampo = 'alias'
-                    continue
-                if comando == 'as':
-                    continue
-                elif proximoCampo == 'alias':
-                    alias = comando
-            if alias == '':
-                alias = tabela
-            interpretacaoFrom['tabela'].append(tabela)
-            interpretacaoFrom['alias'].append(alias)     
+        relacao_ = []
+        for operacao in relacao:
+            if len(operacao) >=2:
+                flag = False
+                #Tenta encontrar os operadores <= e >= nos operadores
+                for operador in ['>=','<=','<>','!=']:
+                    if(flag):
+                        break
+                    if operador in operacao:
+                        flag = True
+                        index = operacao.find(operador)
+                        valor1 = '' 
+                        op = ''
+                        valor2 = '' 
+                        # idade>= (operador grudado no primeiro valor)
+                        if index !=0:
+                            valor1 = operacao[:index]
+                            op = operacao[index:index+2]
+                            # O segundo valor também está grudado (ex:idade>=4)
+                            relacao_.append(valor1)
+                            relacao_.append(op)
+                            if len(operacao) != index+2:
+                                valor2 = operacao[index+2:]
+                                relacao_.append(valor2)
+                        # Se o tamanho da operacao é maior que 2, e o primeiro valor não está grudado,
+                        #então o segundo valor está grudado.
+                        else:
+                            op = operacao[index:index+2]
+                            valor2 = operacao[index+2:]
+                            relacao_.append(op)
+                            relacao_.append(valor2)
+                for operador in ['>','<','=']:
+                    if(flag):
+                        break
+                    if operador in operacao:
+                        flag = True
+                        index = operacao.find(operador)
+                        valor1 = '' 
+                        op = ''
+                        valor2 = '' 
+                        # idade>= (operador grudado no primeiro valor)
+                        if index !=0:
+                            valor1 = operacao[:index]
+                            op = operacao[index:index+1]
+                            relacao_.append(valor1)
+                            relacao_.append(op)
+                            # O segundo valor também está grudado (ex:idade>=4)
+                            if len(operacao) != index+1:
+                                valor2 = operacao[index+1:]
+                                relacao_.append(valor2)
+                        # Se o tamanho da operacao é maior que 2, e o primeiro valor não está grudado,
+                        #então o segundo valor está grudado.
+                        else:
+                            op = operacao[index:index+1]
+                            valor2 = operacao[index+1:]
+                            relacao_.append(op)
+                            relacao_.append(valor2)
+                if not flag:
+                    relacao_.append(operacao)
+            else:
+                relacao_.append(operacao)
 
+        if len(relacao_)!= 0:
+            interpretacaoFrom['join']['enable'] = True
+        else:
+            interpretacaoFrom['join']['enable'] = False
+            
+        for campo in relacao_:
+            index = campo.find('.')
+            if index != -1:
+                interpretacaoFrom['join']['tabela'].append(campo[:index])
+                interpretacaoFrom['join']['att'].append(campo[index+1:])
+                continue
+            if campo == '>=' or campo == '<=' or campo == '>' or campo == '<' or campo == '=' or campo == '!=':
+                interpretacaoFrom['join']['op'].append(campo)
+                continue
+            interpretacaoFrom['join']['tabela'].append("")
+            interpretacaoFrom['join']['att'].append(campo)
+            
+            
         return interpretacaoFrom
 
     def sanitizaComando(self,comando):
@@ -273,7 +386,6 @@ class Interpretador:
                 index -=1
             if comando[index+1] == ' ':
                 comando = comando[:index+1] + comando[index+2:]
-        print(comando) 
         comandoSeparados = comando.split(' ')
         comandosMaisSeparados = []
         

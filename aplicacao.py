@@ -1,6 +1,10 @@
+'''
+AUTORES: FABIO SEITI FUKUDA
+         PEDRO AUGUSTO TORTOLA PEREIRA
+'''
+
 from leitorCSV import LeitorCSV
 from gerenciadorQuery import GerenciadorQuery
-from tabelaOperacao import tabelaOperacao
 from tabela import Tabela
 
 class Aplicacao:
@@ -8,8 +12,20 @@ class Aplicacao:
         self.leitorCSV = LeitorCSV()
         self.gerenciadorQuery = GerenciadorQuery()
         self.tabelas = {}
-        
     def rodar(self):
+        
+        #APAGARRR
+        
+        tabela = self.leitorCSV.lerCSV('course.csv',sep=',')
+        self.tabelas[tabela.nomeTabela] = tabela
+
+        tabela = self.leitorCSV.lerCSV('student.csv',sep=',')
+        self.tabelas[tabela.nomeTabela] = tabela
+        
+
+        self.fazerQueries()
+        #APAGARR
+
         entrada = self.lerInput()
         while entrada!='3':
             match entrada:
@@ -74,6 +90,3 @@ class Aplicacao:
                 print('+',end='')
                 print((tamanhoString+2)*'-',end='')
             print('+')
-if __name__ == '__main__':  
-    app = Aplicacao()
-    app.rodar()
