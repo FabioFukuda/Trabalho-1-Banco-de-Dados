@@ -13,19 +13,6 @@ class Aplicacao:
         self.gerenciadorQuery = GerenciadorQuery()
         self.tabelas = {}
     def rodar(self):
-        
-        #APAGARRR
-        
-        tabela = self.leitorCSV.lerCSV('course.csv',sep=',')
-        self.tabelas[tabela.nomeTabela] = tabela
-
-        tabela = self.leitorCSV.lerCSV('student.csv',sep=',')
-        self.tabelas[tabela.nomeTabela] = tabela
-        
-
-        self.fazerQueries()
-        #APAGARR
-
         entrada = self.lerInput()
         while entrada!='3':
             match entrada:
