@@ -144,7 +144,7 @@ class Interpretador:
                 <> ou !=	Diferente de
                 =	Igual
             '''
-            
+        
         for operacao in where_:
             if operacao == 'and' or operacao == 'or':
                 interpretacaoWhere.append(operacao)
@@ -264,7 +264,9 @@ class Interpretador:
         interpretacaoFrom = {'tabela':[],
                         'alias':[],
                         'joinEn':False,
-                        'join':{'tabela':[],'att':[],'op':[]}}
+                        'join':{'tabela':[],'att':[],'op':[]},
+                        'usingEn':False,
+                        'using':{'campo':[]}}
         
         camposSeparados = []
 
@@ -277,7 +279,7 @@ class Interpretador:
         relacao = []
         proximoCampo = 'tabela'
         for campo in camposSeparados:
-            
+            index = campo.find("using")
             tabela = ''
             alias = ''
         
@@ -288,6 +290,30 @@ class Interpretador:
             elif campo == 'on':
                 proximoCampo = 'relacao'
                 continue
+            elif index!=-1:
+                interpretacaoFrom['usingEn'] = True
+                indexParenteses1 = campo.find('(')
+                if(indexParenteses1 == len(campo)-1):
+                    proximoCampo = 'using'
+                    continue
+                else:
+                    proximoCampo = 'nulo'
+                    indexParenteses2 = campo.find(')')
+                    if(indexParenteses2 != -1):
+                        interpretacaoFrom['using']['campo'] = campo[indexParenteses1+1:indexParenteses2]
+                    else:
+                        interpretacaoFrom['using']['campo'] = campo[indexParenteses1+1:]
+            elif campo == ')':
+                continue
+            elif campo == '':
+                continue
+            if(proximoCampo == 'using'):
+                indexParenteses2 = campo.find(')')
+                if(indexParenteses2 != -1):
+                    interpretacaoFrom['using']['campo'] = campo[:indexParenteses2]
+                else:
+                    interpretacaoFrom['using']['campo'] = campo
+
             if proximoCampo == 'tabela':
                 interpretacaoFrom['tabela'].append(campo)
                 interpretacaoFrom['alias'].append(campo) 
@@ -361,7 +387,7 @@ class Interpretador:
             interpretacaoFrom['join']['enable'] = True
         else:
             interpretacaoFrom['join']['enable'] = False
-            
+
         for campo in relacao_:
             index = campo.find('.')
             if index != -1:
@@ -386,6 +412,7 @@ class Interpretador:
                 index -=1
             if comando[index+1] == ' ':
                 comando = comando[:index+1] + comando[index+2:]
+
         comandoSeparados = comando.split(' ')
         comandosMaisSeparados = []
         

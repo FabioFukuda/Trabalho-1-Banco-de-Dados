@@ -35,34 +35,50 @@ class GerenciadorQuery:
                                       interpretador.interpretacaoOrderBy['direcao'] )
         return tabelaCriada
     def executarSelect(self,interpretador:Interpretador,tabela:Tabela):
-        if interpretador.interpretacaoSelect['nome'][0] == '*':
-            return tabela
+        # if interpretador.interpretacaoSelect['nome'][0] == '*':
+        #     return tabela
         colunas = []
         nomesColunas = []
         for campo in range(len(interpretador.interpretacaoSelect['nome'])):
             if interpretador.interpretacaoSelect['tabela'][campo] == '':
-                try:
-                    nome = interpretador.interpretacaoSelect['nome'][campo]
-                    indice = tabela.nomesColunasLower.index(nome)
-                    colunas.append(tabela.colunas[indice].registros)
-                    nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
-                except:
-                    return 
+                if interpretador.interpretacaoSelect['nome'][campo] == "*":
+                    return tabela
+                else:
+                    novaColuna = tabela[interpretador.interpretacaoSelect['nome'][campo]]
+                    colunas.append(novaColuna)
+                    nomesColunas.append(novaColuna.nome)
             else:
-                aliasTabela = interpretador.interpretacaoSelect['tabela'][campo]
-                nomeTabela = ''
-                try:
-                    if aliasTabela in interpretador.interpretacaoFrom['alias']: 
-                        indiceTabela = interpretador.interpretacaoFrom['alias'].index(aliasTabela)
-                        nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
-                    if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
-                        nome = interpretador.interpretacaoSelect['nome'][campo]
-                        indice = tabela.nomesColunasLower.index(nome)
-                        colunas.append(tabela.colunas[indice].registros)
-                        nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
-                except:
-                    return
-        return Tabela(nomesColunas,colunas,nomeTabela = tabela.nomeTabela)
+                if interpretador.interpretacaoSelect['nome'][campo] == "*":
+                    colunas+=tabela.getColunasByTabela(interpretador.interpretacaoSelect['tabela'][campo])
+                    nomesColunas+=tabela.getNomesColunasByTabela(interpretador.interpretacaoSelect['tabela'][campo])
+                else:
+                    novaColuna = tabela[tabela.procuraIndiceColunaPorTabelaEColuna(interpretador.interpretacaoSelect['tabela'][campo],interpretador.interpretacaoSelect['nome'][campo])]
+                    colunas.append(novaColuna)
+                    nomesColunas.append(novaColuna.nome)
+        # for campo in range(len(interpretador.interpretacaoSelect['nome'])):
+        #     if interpretador.interpretacaoSelect['tabela'][campo] == '':
+        #         try:
+        #             nome = interpretador.interpretacaoSelect['nome'][campo]
+        #             indice = tabela.nomesColunasLower.index(nome)
+        #             colunas.append(tabela.colunas[indice].registros)
+        #             nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+        #         except:
+        #             return 
+        #     else:
+        #         aliasTabela = interpretador.interpretacaoSelect['tabela'][campo]
+        #         nomeTabela = ''
+        #         try:
+        #             if aliasTabela in interpretador.interpretacaoFrom['alias']: 
+        #                 indiceTabela = interpretador.interpretacaoFrom['alias'].index(aliasTabela)
+        #                 nomeTabela = interpretador.interpretacaoFrom['tabela'][indiceTabela]
+        #             if nomeTabela == tabela.nomeTabela or aliasTabela in interpretador.interpretacaoFrom['tabela']:
+        #                 nome = interpretador.interpretacaoSelect['nome'][campo]
+        #                 indice = tabela.nomesColunasLower.index(nome)
+        #                 colunas.append(tabela.colunas[indice].registros)
+        #                 nomesColunas.append(interpretador.interpretacaoSelect['alias'][campo])
+        #         except:
+        #             return
+        return Tabela(nomesColunas,[],colunas,nomeTabela = tabela.nomeTabela)
         
 
          
@@ -73,12 +89,25 @@ class GerenciadorQuery:
                 tabelaFrom[nomeTabela] = tabelas[nomeTabela]
             except:
                 return None
-        if interpretador.interpretacaoFrom['join']['enable']:
+        if interpretador.interpretacaoFrom['joinEn']:
             try:
-                coluna1 = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][0]][interpretador.interpretacaoFrom['join']['att'][0]]
-                coluna2 = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][1]][interpretador.interpretacaoFrom['join']['att'][1]]
-                tabela = (coluna1 == coluna2)
-                tabela = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][0]].join(tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][1]],tabela)
+                if interpretador.interpretacaoFrom['usingEn']:
+                    colunas = []
+                    tabelas = list(tabelaFrom.values())
+                    for tabela in tabelas:
+                        colunas.append(tabela[interpretador.interpretacaoFrom['using']['campo']])
+                    tabela = None
+                    for i in range(len(colunas)-1):
+                        tabela = colunas[i] == colunas[i+1]
+                        if(i==0):
+                            tabela = tabelas[i].join(tabelas[i+1],tabela)
+                        else:
+                            tabela = tabela.join(tabelas[i+1],tabela)
+                else:
+                    coluna1 = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][0]][interpretador.interpretacaoFrom['join']['att'][0]]
+                    coluna2 = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][1]][interpretador.interpretacaoFrom['join']['att'][1]]
+                    tabela = (coluna1 == coluna2)
+                    tabela = tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][0]].join(tabelaFrom[interpretador.interpretacaoFrom['join']['tabela'][1]],tabela)
             except:
                 return None
         else:

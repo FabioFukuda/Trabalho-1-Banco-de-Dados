@@ -17,6 +17,18 @@ class Tabela:
             self.nomesColunasLower.append(coluna.lower())
             self.colunas.append(Coluna(coluna,registros[index]))
 
+    def getColunasByTabela(self,tabela):
+        colunas  = []
+        for i in range(len(self.origemColunas)):
+            if self.origemColunas[i] == tabela:
+                colunas.append(self.colunas[i])
+        return colunas
+    def getNomesColunasByTabela(self,tabela):
+        nomes  = []
+        for i in range(len(self.origemColunas)):
+            if self.origemColunas[i] == tabela:
+                nomes.append(self.nomesColunas[i])
+        return nomes
 
     def procuraTabelaPorColuna(self,coluna):
         for i in range(len(self.nomesColunas)):
@@ -175,9 +187,9 @@ class Tabela:
             for indice in indices:
                 for numColuna,coluna in enumerate(self.colunas):
                     registros[numColuna].append(coluna[indice])    
-            return Tabela(self.nomesColunas,self.nomeTabela,registros,nomeTabela=self.nomeTabela)
+            return Tabela(self.nomesColunas,self.origemColunas,registros,nomeTabela=self.nomeTabela)
         elif type(key) == int:
-            self.colunas[key]
+            return self.colunas[key]
         else:
             index = self.nomesColunasLower.index(key)
             return self.colunas[index]
